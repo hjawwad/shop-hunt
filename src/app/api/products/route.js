@@ -1,54 +1,77 @@
 import { NextResponse } from 'next/server';
-
-// Sample products data
-const products = [
-    {
-        id: 1,
-        name: 'YK11 Myostine',
-        description: 'Highly selective androgen receptor modulator',
-        code: 'YK11',
-        price: 59.99,
-        image: '/images/products/yk11.jpg',
-        link: 'https://science.bio/yk11-myostine/',
-        category: 'sarms'
-    },
-    {
-        id: 2,
-        name: 'MK-677 Ibutamoren',
-        description: 'Growth hormone secretagogue',
-        code: 'MK-677',
-        price: 49.99,
-        image: '/images/products/mk677.jpg',
-        link: 'https://science.bio/mk-677-ibutamoren/',
-        category: 'sarms'
-    },
-    {
-        id: 3,
-        name: 'RAD140 Testolone',
-        description: 'Potent selective androgen receptor modulator',
-        code: 'RAD140',
-        price: 54.99,
-        image: '/images/products/rad140.jpg',
-        link: 'https://science.bio/rad140-testolone/',
-        category: 'sarms'
-    }
-];
+import { getSupabaseClient } from '../../../lib/supabase';
 
 export async function GET() {
-    return NextResponse.json(products);
+    try {
+        // Use service role client for server-side operations
+        const supabase = getSupabaseClient(true);
+
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('product_name', { ascending: true });
+
+        if (error) {
+            console.error('Supabase error:', error);
+            return NextResponse.json(
+                { error: 'Failed to fetch products', details: error.message },
+                { status: 500 }
+            );
+        }
+
+        return NextResponse.json({ products: data, count: data.length });
+    } catch (error) {
+        console.error('API error:', error);
+        return NextResponse.json(
+            { error: 'Internal server error', details: error.message },
+            { status: 500 }
+        );
+    }
 }
 
 export async function POST(request) {
+    try {
     const body = await request.json();
+        const { product_name, price, coupon_code, buy_link } = body;
 
-    // In a real app, you'd save to a database
-    const newProduct = {
-        id: products.length + 1,
-        ...body,
-        createdAt: new Date().toISOString()
-    };
+        // Validate required fields
+        if (!product_name || !price) {
+            return NextResponse.json(
+                { error: 'Missing required fields: product_name and price are required' },
+                { status: 400 }
+            );
+        }
 
-    products.push(newProduct);
+        // Use service role client for server-side operations
+        const supabase = getSupabaseClient(true);
 
-    return NextResponse.json(newProduct, { status: 201 });
+        const { data, error } = await supabase
+            .from('products')
+            .insert([
+                {
+                    product_name,
+                    price: parseFloat(price),
+                    coupon_code: coupon_code || null,
+                    buy_link: buy_link || null,
+                }
+            ])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Supabase error:', error);
+            return NextResponse.json(
+                { error: 'Failed to create product', details: error.message },
+                { status: 500 }
+            );
+        }
+
+        return NextResponse.json({ product: data }, { status: 201 });
+    } catch (error) {
+        console.error('API error:', error);
+        return NextResponse.json(
+            { error: 'Internal server error', details: error.message },
+            { status: 500 }
+        );
+    }
 } 

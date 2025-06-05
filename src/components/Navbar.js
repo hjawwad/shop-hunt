@@ -23,6 +23,9 @@ export default function Navbar() {
                                     </svg>
                                 </button>
                             </div>
+                            <Link href="/products" className="text-gray-200 hover:text-yellow-400 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-slate-700">
+                                Products
+                            </Link>
                             <Link href="/mk-677" className="text-gray-200 hover:text-yellow-400 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-slate-700">
                                 MK-677
                             </Link>
@@ -59,6 +62,9 @@ export default function Navbar() {
                 <div className="px-4 pt-4 pb-6 space-y-2 bg-slate-900 border-t border-slate-700">
                     <Link href="/sarms" className="text-gray-200 hover:text-yellow-400 hover:bg-slate-800 block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200">
                         SARMs
+                    </Link>
+                    <Link href="/products" className="text-gray-200 hover:text-yellow-400 hover:bg-slate-800 block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200">
+                        Products
                     </Link>
                     <Link href="/mk-677" className="text-gray-200 hover:text-yellow-400 hover:bg-slate-800 block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200">
                         MK-677
