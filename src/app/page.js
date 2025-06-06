@@ -18,7 +18,7 @@ export default function Home() {
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
                 Find Your Perfect
-                <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent"> SARMs</span>
+                <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent"> Products</span>
               </h1>
               <p className="text-xl text-gray-300 mb-8 leading-relaxed">
                 Search through trusted sources and verified products
@@ -37,35 +37,6 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </button>
-                </div>
-
-                {/* Popular searches */}
-                <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  <span className="text-gray-400 text-sm">Popular:</span>
-                  {['MK-677', 'RAD140', 'Cardarine', 'Science.bio', 'Ostarine'].map((term) => (
-                    <button
-                      key={term}
-                      className="px-4 py-2 bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white rounded-full text-sm font-medium transition-all duration-200 border border-white/20 hover:border-white/40"
-                    >
-                      {term}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quick stats */}
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-400 mb-2">50+</div>
-                  <div className="text-gray-300 text-sm">Verified Products</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-teal-400 mb-2">10+</div>
-                  <div className="text-gray-300 text-sm">Trusted Vendors</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-400 mb-2">99%+</div>
-                  <div className="text-gray-300 text-sm">Purity Guaranteed</div>
                 </div>
               </div>
             </div>
