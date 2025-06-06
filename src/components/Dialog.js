@@ -14,12 +14,12 @@ export default function Dialog({ isOpen, onClose, title, children }) {
 
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full max-w-lg">
+        <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full max-w-2xl">
           {/* Close Icon */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none z-10"
             aria-label="Close"
           >
             <IoMdClose size={24} />

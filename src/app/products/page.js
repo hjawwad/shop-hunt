@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ProductCard } from '../../components';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [copiedCode, setCopiedCode] = useState(null);
 
     useEffect(() => {
         fetchProducts();
@@ -27,18 +27,7 @@ export default function ProductsPage() {
                 throw error;
             }
 
-            // Transform the data to match our ProductCard component structure
-            const transformedProducts = data.map(product => ({
-                id: product.id,
-                name: product.product_name,
-                price: product.price,
-                code: product.coupon_code || '',
-                link: product.buy_link || '#',
-                description: `High-quality ${product.product_name}`,
-                image: '/next.svg' // Using placeholder for now
-            }));
-
-            setProducts(transformedProducts);
+            setProducts(data || []);
         } catch (error) {
             console.error('Error fetching products:', error);
             setError(error.message);
@@ -47,128 +36,204 @@ export default function ProductsPage() {
         }
     };
 
+    const copyToClipboard = async (code, productId) => {
+        try {
+            await navigator.clipboard.writeText(code);
+            setCopiedCode(productId);
+            setTimeout(() => setCopiedCode(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    };
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-white">
-                {/* Loading Hero Section */}
-                <section className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 py-20">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-                            Our Products
-                        </h1>
-                        <div className="text-xl text-gray-300">
-                            Loading products...
+            <div className="min-h-screen bg-gray-50">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div className="text-center">
+                        <div className="inline-flex items-center px-4 py-2 bg-white rounded-full shadow-sm mb-8">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600 mr-3"></div>
+                            <span className="text-gray-600">Loading products...</span>
                         </div>
                     </div>
-                </section>
-
-                {/* Loading Spinner */}
-                <section className="py-20">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-center items-center">
-                            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-teal-500"></div>
-                        </div>
+                    <div className="space-y-4">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                                <div className="animate-pulse flex items-center justify-between">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                                        <div className="space-y-2">
+                                            <div className="h-4 bg-gray-200 rounded w-48"></div>
+                                            <div className="h-3 bg-gray-100 rounded w-32"></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <div className="h-8 bg-gray-200 rounded w-24"></div>
+                                        <div className="h-10 bg-gray-200 rounded w-32"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </section>
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen bg-white">
-                {/* Error Hero Section */}
-                <section className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 py-20">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-                            Our Products
-                        </h1>
-                        <div className="text-xl text-red-400">
-                            Error loading products
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="max-w-md mx-auto text-center">
+                    <div className="bg-white rounded-xl p-8 shadow-sm border border-red-100">
+                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                         </div>
-                    </div>
-                </section>
-
-                {/* Error Message */}
-                <section className="py-20">
-                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-8">
-                            <div className="text-red-800 text-lg font-semibold mb-2">
-                                Failed to load products
-                            </div>
-                            <div className="text-red-600">
-                                {error}
-                            </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Products</h3>
+                        <p className="text-gray-600 mb-4">{error}</p>
                             <button
                                 onClick={fetchProducts}
-                                className="mt-4 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                             >
                                 Try Again
                             </button>
                         </div>
-                    </div>
-                </section>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-white">
-            {/* Hero Section */}
-            <section className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-                        Our Products
-                    </h1>
-                    <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                        Discover our carefully curated selection of premium SARMs from trusted sources
-                    </p>
-                    <div className="mt-8">
-                        <div className="inline-flex items-center bg-white/10 backdrop-blur-lg rounded-full px-6 py-3 border border-white/20">
-                            <span className="text-yellow-400 font-bold text-lg mr-2">{products.length}</span>
-                            <span className="text-gray-300">Products Available</span>
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Products</h1>
+                            <p className="text-gray-600">Discover our premium selection of SARMs and supplements</p>
+                        </div>
+                        <div className="bg-indigo-50 px-4 py-2 rounded-full">
+                            <span className="text-sm font-medium text-indigo-700">
+                                {products.length} Products
+                            </span>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* Products Grid */}
-            <section className="py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Products List */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {products.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="space-y-4">
                             {products.map((product) => (
-                                <ProductCard key={product.id} product={product} />
+                                <div
+                                    key={product.id}
+                                    className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 hover:border-gray-200"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        {/* Product Info */}
+                                        <div className="flex items-center space-x-6">
+                                            {/* Product Icon */}
+                                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                                <span className="text-white font-bold text-lg">
+                                                    {(product.category || 'SARM').toUpperCase().slice(0, 2)}
+                                                </span>
+                                            </div>
+
+                                            {/* Product Details */}
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                                                    {product.product_name}
+                                                </h3>
+                                                <p className="text-gray-600 text-sm mb-2">
+                                                    {product.description || `High-quality ${product.product_name}`}
+                                                </p>
+                                                <div className="flex items-center space-x-4">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                        {product.category || 'SARMs'}
+                                                    </span>
+                                                    {product.price && (
+                                                        <span className="text-lg font-bold text-green-600">
+                                                            ${product.price}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex items-center space-x-4">
+                                            {/* Coupon Code */}
+                                            {product.coupon_code && (
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm">
+                                                        {product.coupon_code}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => copyToClipboard(product.coupon_code, product.id)}
+                                                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                                        title="Copy coupon code"
+                                                    >
+                                                        {copiedCode === product.id ? (
+                                                            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {/* View Product Button */}
+                                            <a
+                                                href={product.buy_link || '#'}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm hover:shadow-md"
+                                            >
+                                                <span>View Product</span>
+                                                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     ) : (
                         <div className="text-center py-16">
-                            <div className="bg-gray-50 rounded-xl p-12">
-                                <div className="text-gray-400 text-6xl mb-4">📦</div>
-                                <h3 className="text-2xl font-bold text-gray-800 mb-2">No Products Available</h3>
+                            <div className="bg-white rounded-xl p-12 shadow-sm border border-gray-100">
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Products Available</h3>
                                 <p className="text-gray-600">
                                     We're currently updating our inventory. Please check back soon!
                                 </p>
                             </div>
                         </div>
                     )}
-                </div>
-            </section>
+            </div>
 
-            {/* Call to Action */}
-            <section className="py-20 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 text-white">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-4xl font-bold mb-6">
-                        Need Help Choosing?
-                    </h2>
-                    <p className="text-xl text-gray-300 mb-8">
-                        Our experts are here to help you find the perfect products for your goals
-                    </p>
-                    <button className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105">
-                        Contact Us
-                    </button>
+            {/* Copy Success Toast */}
+            {copiedCode && (
+                <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in">
+                    <div className="flex items-center space-x-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Coupon code copied!</span>
+                    </div>
                 </div>
-            </section>
+            )}
         </div>
     );
 } 

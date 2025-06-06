@@ -8,35 +8,15 @@ export default function Navbar() {
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-500 text-slate-900 px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                            SARMLEAKS.COM
+                            Shop Hunt
                         </Link>
                     </div>
 
                     {/* Navigation Links */}
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-baseline space-x-6">
-                            <div className="relative group">
-                                <button className="text-gray-200 hover:text-yellow-400 px-4 py-3 rounded-lg text-sm font-medium flex items-center transition-colors duration-200 hover:bg-slate-700">
-                                    SARMs
-                                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                            </div>
                             <Link href="/products" className="text-gray-200 hover:text-yellow-400 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-slate-700">
                                 Products
-                            </Link>
-                            <Link href="/mk-677" className="text-gray-200 hover:text-yellow-400 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-slate-700">
-                                MK-677
-                            </Link>
-                            <Link href="/cardarine" className="text-gray-200 hover:text-yellow-400 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-slate-700">
-                                Cardarine
-                            </Link>
-                            <Link href="/stenabolic" className="text-gray-200 hover:text-yellow-400 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-slate-700">
-                                Stenabolic
-                            </Link>
-                            <Link href="/buy-sarms" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 py-3 rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                                Buy SARMs
                             </Link>
                         </div>
                     </div>
@@ -60,23 +40,8 @@ export default function Navbar() {
             {/* Mobile menu */}
             <div className="md:hidden" id="mobile-menu">
                 <div className="px-4 pt-4 pb-6 space-y-2 bg-slate-900 border-t border-slate-700">
-                    <Link href="/sarms" className="text-gray-200 hover:text-yellow-400 hover:bg-slate-800 block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200">
-                        SARMs
-                    </Link>
                     <Link href="/products" className="text-gray-200 hover:text-yellow-400 hover:bg-slate-800 block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200">
                         Products
-                    </Link>
-                    <Link href="/mk-677" className="text-gray-200 hover:text-yellow-400 hover:bg-slate-800 block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200">
-                        MK-677
-                    </Link>
-                    <Link href="/cardarine" className="text-gray-200 hover:text-yellow-400 hover:bg-slate-800 block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200">
-                        Cardarine
-                    </Link>
-                    <Link href="/stenabolic" className="text-gray-200 hover:text-yellow-400 hover:bg-slate-800 block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200">
-                        Stenabolic
-                    </Link>
-                    <Link href="/buy-sarms" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white block px-4 py-3 rounded-lg text-base font-bold transition-all duration-300 mt-4">
-                        Buy SARMs
                     </Link>
                 </div>
             </div>

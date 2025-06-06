@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "SARMLEAKS.COM - #1 SARMs Source Reviews & Recommendations",
-  description: "Discover the best SARMs sources with in-depth reviews, recommendations, and discount codes. Find trusted vendors for MK-677, Cardarine, RAD140, and more.",
-  keywords: "SARMs, MK-677, Cardarine, RAD140, Stenabolic, Science.bio, SARMs reviews",
+  title: "Shop Hunt - Find Your Perfect Products & Suppliers",
+  description: "Discover the best products and trusted suppliers with Shop Hunt. Find verified vendors, compare options, and get the best deals on quality products.",
+  keywords: "products, suppliers, online shopping, verified vendors, product search, Shop Hunt",
 };
 
 export default function RootLayout({ children }) {

@@ -7,11 +7,13 @@ export default function SupplierForm({ onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     name: '',
     storeLink: '',
-    countryFlag: '',
+    country: '',
     productId: ''
   });
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -22,9 +24,51 @@ export default function SupplierForm({ onSubmit, onCancel }) {
     setProducts(data || []);
   };
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Supplier name is required';
+    }
+
+    if (!formData.storeLink.trim()) {
+      newErrors.storeLink = 'Store link is required';
+    } else {
+      try {
+        new URL(formData.storeLink);
+      } catch {
+        newErrors.storeLink = 'Please enter a valid URL';
+      }
+    }
+
+    if (!formData.country.trim()) {
+      newErrors.country = 'Country flag is required';
+    }
+
+    if (!formData.productId) {
+      newErrors.productId = 'Please select a product';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await onSubmit(formData);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -33,6 +77,14 @@ export default function SupplierForm({ onSubmit, onCancel }) {
       ...prev,
       [name]: value
     }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   const filteredProducts = products.filter(p =>
@@ -52,8 +104,15 @@ export default function SupplierForm({ onSubmit, onCancel }) {
           required
           value={formData.name}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base px-4 py-3"
+          className={`mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 sm:text-base px-4 py-3 text-gray-900 placeholder-gray-500 ${errors.name
+              ? 'border-red-300 focus:border-red-500'
+              : 'border-gray-300 focus:border-indigo-500'
+            }`}
+          placeholder="Enter supplier name"
         />
+        {errors.name && (
+          <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+        )}
       </div>
 
       <div>
@@ -67,24 +126,37 @@ export default function SupplierForm({ onSubmit, onCancel }) {
           required
           value={formData.storeLink}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base px-4 py-3"
+          className={`mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 sm:text-base px-4 py-3 text-gray-900 placeholder-gray-500 ${errors.storeLink
+              ? 'border-red-300 focus:border-red-500'
+              : 'border-gray-300 focus:border-indigo-500'
+            }`}
+          placeholder="https://example.com"
         />
+        {errors.storeLink && (
+          <p className="mt-1 text-sm text-red-600">{errors.storeLink}</p>
+        )}
       </div>
 
       <div>
-        <label htmlFor="countryFlag" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="country" className="block text-sm font-medium text-gray-700">
           Country Flag (Emoji)
         </label>
         <input
           type="text"
-          name="countryFlag"
-          id="countryFlag"
+          name="country"
+          id="country"
           required
-          value={formData.countryFlag}
+          value={formData.country}
           onChange={handleChange}
           placeholder="🇺🇸"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base px-4 py-3"
+          className={`mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 sm:text-base px-4 py-3 text-gray-900 placeholder-gray-500 ${errors.country
+              ? 'border-red-300 focus:border-red-500'
+              : 'border-gray-300 focus:border-indigo-500'
+            }`}
         />
+        {errors.country && (
+          <p className="mt-1 text-sm text-red-600">{errors.country}</p>
+        )}
       </div>
 
       <div>
@@ -94,9 +166,10 @@ export default function SupplierForm({ onSubmit, onCancel }) {
           placeholder="Search products..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="mb-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base px-3 py-2"
+          className="mb-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base px-3 py-2 text-gray-900 placeholder-gray-500"
         />
-        <div className="max-h-40 overflow-y-auto border rounded-md bg-white">
+        <div className={`max-h-40 overflow-y-auto border rounded-md bg-white ${errors.productId ? 'border-red-300' : 'border-gray-300'
+          }`}>
           {filteredProducts.length === 0 ? (
             <div className="text-gray-400 p-2 text-sm">No products found.</div>
           ) : (
@@ -108,13 +181,16 @@ export default function SupplierForm({ onSubmit, onCancel }) {
                   value={product.id}
                   checked={formData.productId === product.id}
                   onChange={handleChange}
-                  className="mr-2"
+                  className="mr-2 text-indigo-600 focus:ring-indigo-500"
                 />
-                <span>{product.product_name}</span>
+                <span className="text-gray-900">{product.product_name}</span>
               </label>
             ))
           )}
         </div>
+        {errors.productId && (
+          <p className="mt-1 text-sm text-red-600">{errors.productId}</p>
+        )}
       </div>
 
       <div className="flex justify-end space-x-3">
@@ -122,14 +198,16 @@ export default function SupplierForm({ onSubmit, onCancel }) {
           type="button"
           onClick={onCancel}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          disabled={isSubmitting}
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
         >
-          Add Supplier
+          {isSubmitting ? 'Adding...' : 'Add Supplier'}
         </button>
       </div>
     </form>
