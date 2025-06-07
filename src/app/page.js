@@ -1,76 +1,79 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import Dialog from '../components/Dialog';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productSuppliers, setProductSuppliers] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [loadingSuppliers, setLoadingSuppliers] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  useEffect(() => {
+    // Fetch all products once on mount
+    const fetchProducts = async () => {
+      const { data } = await supabase.from('products').select('*');
+      setAllProducts(data || []);
+    };
+    fetchProducts();
+  }, []);
 
-    setIsSearching(true);
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .or(`product_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`)
-        .order('product_name', { ascending: true });
-
-      if (error) throw error;
-
-      setSearchResults(data || []);
-      setShowSearchModal(true);
-    } catch (error) {
-      console.error('Search error:', error);
-      alert('Search failed. Please try again.');
-    } finally {
-      setIsSearching(false);
+  useEffect(() => {
+    // Filter products as the user types
+    if (searchQuery.trim()) {
+      setFilteredProducts(
+        allProducts.filter(
+          (p) =>
+            p.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+        )
+      );
+    } else {
+      setFilteredProducts([]);
     }
-  };
+  }, [searchQuery, allProducts]);
 
   const handleProductClick = async (product) => {
     setSelectedProduct(product);
     setLoadingSuppliers(true);
-    setShowSearchModal(false);
     setShowProductModal(true);
 
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('suppliers')
         .select('*')
         .eq('product_id', product.id)
         .order('name', { ascending: true });
 
-      if (error) throw error;
-
       setProductSuppliers(data || []);
     } catch (error) {
-      console.error('Error fetching suppliers:', error);
       setProductSuppliers([]);
     } finally {
       setLoadingSuppliers(false);
+      setFilteredProducts([]);
     }
-  };
-
-  const closeSearchModal = () => {
-    setShowSearchModal(false);
-    setSearchResults([]);
   };
 
   const closeProductModal = () => {
     setShowProductModal(false);
     setSelectedProduct(null);
     setProductSuppliers([]);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setSearchResults(filteredProducts);
+    setShowSearchModal(true);
+    setFilteredProducts([]);
   };
 
   return (
@@ -96,30 +99,43 @@ export default function Home() {
               </p>
 
               {/* Search Bar */}
-              <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search for SARMs, companies, or products..."
-                    className="w-full h-16 pl-6 pr-20 text-lg bg-white rounded-2xl shadow-xl border-2 border-transparent focus:border-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-400/20 transition-all duration-300 placeholder-gray-500 text-gray-900"
-                    disabled={isSearching}
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSearching || !searchQuery.trim()}
-                    className="absolute right-2 top-2 bottom-2 px-8 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                  >
-                    {isSearching ? (
-                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
+              <form onSubmit={handleSearchSubmit} className="relative max-w-2xl mx-auto">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for SARMs, companies, or products..."
+                  className="w-full h-16 pl-6 pr-20 text-lg bg-white rounded-2xl shadow-xl border-2 border-transparent focus:border-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-400/20 transition-all duration-300 placeholder-gray-500 text-gray-900"
+                  disabled={isSearching}
+                  autoComplete="off"
+                />
+                {/* Product Names Dropdown */}
+                {searchQuery && filteredProducts.length > 0 && (
+                  <div className="absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-lg z-20 max-h-60 overflow-y-auto border border-gray-200">
+                    {filteredProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        onClick={() => handleProductClick(product)}
+                        className="px-6 py-3 hover:bg-indigo-50 cursor-pointer text-left text-gray-900 font-semibold"
+                      >
+                        {product.product_name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={isSearching || !searchQuery.trim()}
+                  className="absolute right-2 top-2 bottom-2 px-8 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isSearching ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  )}
+                </button>
               </form>
             </div>
           </div>
@@ -257,7 +273,7 @@ export default function Home() {
       {/* Search Results Modal */}
       <Dialog
         isOpen={showSearchModal}
-        onClose={closeSearchModal}
+        onClose={() => setShowSearchModal(false)}
         title={`Search Results (${searchResults.length})`}
       >
         <div className="max-h-96 overflow-y-auto">
